@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.Random;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +25,11 @@ public class MainActivity extends Activity {
 			,myImageButton10,myImageButton11,myImageButton12,myImageButton13,myImageButton14,myImageButton15};;
 	private String[] cardSuit = {"c","d","h","s"};
 	private String[] cardNumber = {"1","2","3","4","5","6","7","8","9","10","11","12","13"};
+	private EditText timerLabel;
+	private EditText scoreLabel;
 	
+	public CountDownTimer cd;
+	private Boolean gameStarted = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +37,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		 //create a reference to my Controls an store buttons in array
+		
+		this.timerLabel = (EditText) findViewById(R.id.editText2);
+		this.scoreLabel = (EditText) findViewById(R.id.editText1);
 		
 		imageButtons[0] = this.myImageButton0 = (ImageButton) findViewById(R.id.ImageButton01);
 		imageButtons[1] = this.myImageButton1 = (ImageButton) findViewById(R.id.ImageButton02);
@@ -50,7 +59,7 @@ public class MainActivity extends Activity {
 		imageButtons[15] = this.myImageButton15 = (ImageButton) findViewById(R.id.ImageButton16);
 			
 		
-	//LOOP to add eventlisteners to each button		
+	//LOOP to add event listeners to each button		
 	for( int i = 15 ; i >= 0; i -- ) {
 		final int cardIndex = i;
 			imageButtons[i].setOnClickListener(new View.OnClickListener() {
@@ -85,6 +94,39 @@ public class MainActivity extends Activity {
 	}
 
 	 private void selectCardButton(int cardIndex) {
+		 
+		 //RED's code to start a timer and only run it once 
+		 if (gameStarted == false){
+			 gameStarted = true;
+		 
+		 //creates a timer at 60 seconds and starts counting down after the first click
+		 cd = new CountDownTimer(60000, 1000) {
+
+				//onTick update the timerTextView with how many seconds are remaining
+			     public void onTick(long millisUntilFinished) {
+			    	 timerLabel .setText("" + millisUntilFinished / 1000);
+			     }
+
+				@Override
+				public void onFinish() {
+					// TODO Auto-generated method stub						
+				}
+			}.start();
+		 
+		 }
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
 		 
 			 //setup highlight of selected
 			 //myImageButton0.setBackgroundResource(R.drawable.card_7s);
