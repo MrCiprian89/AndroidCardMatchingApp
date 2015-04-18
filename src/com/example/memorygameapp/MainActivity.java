@@ -23,6 +23,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+/*
+ * Card Matching Memory Game
+ * An app that displays 16 random pairs of cards that the user must click and match within the alloted time
+ * Authors: Stephen Ciprian and Anirudh Bathini
+ * Date: 17 April, 20015
+ */
 public class MainActivity extends Activity {
 
 	//Game Objects ###########################################################################
@@ -117,7 +123,7 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	//EVENT LISTENER ########################################################################
+	//EVENT LISTENERS ########################################################################
 	/*
 	 * Method starts the timer at beginning of game and then flips cards face up
 	 * @param take an integer that keeps track of the index of the card that was clicked
@@ -152,12 +158,14 @@ public class MainActivity extends Activity {
 			card1 = -1;
 			this.imageButtons[cardIndex].setImageResource(getResources().getIdentifier("cardback", "drawable" ,getPackageName()));
 			imageButtons[cardIndex].setBackgroundColor(android.R.drawable.btn_default);
+			 this.dsplayMessage.setText("“Pick a card, any card");
 		}
 		else if(card1 < 0){
 			 //setup highlight of selected
 			 imageButtons[cardIndex].setBackgroundColor(Color.rgb(255, 255, 51));
 			card1 = cardIndex;
 			this.imageButtons[cardIndex].setImageResource(getResources().getIdentifier(cardString, "drawable" ,getPackageName())); 
+			 this.dsplayMessage.setText("Now pick another card");
 		}
 		else if(card1 >= 0){		
 			this.imageButtons[cardIndex].setImageResource(getResources().getIdentifier(cardString, "drawable" ,getPackageName())); 
@@ -191,7 +199,10 @@ public class MainActivity extends Activity {
 	 
 	 
 	 //PRIVATE UTILITY METHODS
-	 private void init(){//Initialize the game
+	 /*
+	  * Method to initialize the game and be called when play again is pressed
+	  */
+	 private void init(){
 			//LOOP through and store the random card values
 			int key=0;
 			Iterator<String> iterator = pickEightCards().iterator();
@@ -207,15 +218,19 @@ public class MainActivity extends Activity {
 				this.imageButtons[i].setImageResource(getResources().getIdentifier("cardback", "drawable" ,getPackageName()));
 			}//END for
 
+			//Reset all varialbles
 			gameStarted = false;
 			card1 = -1;
 			card2 = -2;
 			score = 0;
 			this.scoreLabel.setText("0");
 			 this.timerLabel.setText("0");
+			 this.dsplayMessage.setText("“Pick a card, any card");
 	 }
 	  
-	// pick eight cards out of a 52 card deck and shuffle 2 copies of each into a 16 member ArrayList
+	/*
+	 *  pick eight cards out of a 52 card deck and shuffle 2 copies of each into a 16 member ArrayList
+	 */
 		private static ArrayList<String> pickEightCards() {
 			Random random = new Random();
 			ArrayList<String> deckOfCards = new ArrayList<String>();
@@ -243,6 +258,7 @@ public class MainActivity extends Activity {
 		} // end pickEightCards method
 		
 		/*
+		 * Checks if two strings from a Hashmap indices match
 		 * @param1 takes the index of the first card being checked
 		 * @param2 takes the index of the second card being checked
 		 */
@@ -264,6 +280,10 @@ public class MainActivity extends Activity {
 			return correctAnswer;
 		}//END checkMatch()
 		
+		/*
+		 * creates and shows an end game dialogue with option to reset or quit app
+		 * @param String takes a string to show message depending on win or lose
+		 */
 			public void endGame(String winStatus) {
 		//display 0 on the timer
 	   	 this.timerLabel.setText("0");

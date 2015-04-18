@@ -1,3 +1,13 @@
+
+<!--   Card Matching Memory Game -->
+<!--   An app that displays 16 random pairs of cards that the user must click and match within the alloted time -->
+<!--   Authors: Stephen Ciprian and Anirudh Bathini -->
+<!--   Date: 17 April, 20015 -->
+ 
+
+
+
+
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/TableLayout1"
