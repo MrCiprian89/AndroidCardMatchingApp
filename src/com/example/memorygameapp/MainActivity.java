@@ -2,10 +2,13 @@ package com.example.memorygameapp;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.Menu;
@@ -27,7 +30,22 @@ public class MainActivity extends Activity {
 	private String[] cardNumber = {"1","2","3","4","5","6","7","8","9","10","11","12","13"};
 	private EditText timerLabel;
 	private EditText scoreLabel;
+
+	//stores the unique value pairs of cards
+	HashMap<Integer, String> grid = new HashMap<Integer, String>();
+
 	
+	
+	//array to store what card is chosen at each position
+		int[] cardValues;
+		//variable to show how many cards are face up
+		int numberOfFaceUpCards = 0;
+		//store values of the cards that are face up and their positions
+		int cardValue1;
+		int cardValue2;
+		int cardPos1=-1;
+		int cardPos2;
+		
 	public CountDownTimer cd;
 	private Boolean gameStarted = false;
 	
@@ -36,8 +54,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		 //create a reference to my Controls an store buttons in array
-		
+		 //create a reference to Controls an store buttons in array	
 		this.timerLabel = (EditText) findViewById(R.id.editText2);
 		this.scoreLabel = (EditText) findViewById(R.id.editText1);
 		
@@ -57,8 +74,18 @@ public class MainActivity extends Activity {
 		imageButtons[13] = this.myImageButton13= (ImageButton) findViewById(R.id.ImageButton14);
 		imageButtons[14] = this.myImageButton14 = (ImageButton) findViewById(R.id.ImageButton15);
 		imageButtons[15] = this.myImageButton15 = (ImageButton) findViewById(R.id.ImageButton16);
-			
 		
+		Iterator<String> iterator = pickEightCards().iterator();
+		int key=0;
+		//LOOP through and store the random card values
+		while (iterator.hasNext()) {
+			String value = (String) iterator.next();
+			grid.put(key, value);
+			key++;
+		}
+		scoreLabel.setText(grid.get(1));
+	//	scoreLabel.setText((CharSequence) grid.values());
+	//	scoreLabel.setText(Boolean.toString(grid.isEmpty()));
 	//LOOP to add event listeners to each button		
 	for( int i = 15 ; i >= 0; i -- ) {
 		final int cardIndex = i;
@@ -73,7 +100,7 @@ public class MainActivity extends Activity {
 		}
 		
 	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -109,34 +136,48 @@ public class MainActivity extends Activity {
 
 				@Override
 				public void onFinish() {
-					// TODO Auto-generated method stub						
+					//when the timer runs out
+					
 				}
-			}.start();
+			}.start(); //starts timer on creation
 		 
-		 }
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		 
+		 }	
 			 //setup highlight of selected
-			 //myImageButton0.setBackgroundResource(R.drawable.card_7s);
+			 imageButtons[cardIndex].setBackgroundColor(Color.rgb(255, 255, 51));
 			// tsetImageResource(R.drawable.card_10c);
-		 
-		// this.imageButtons[cardIndex].setImageResource(R.drawable.card_10c);
-		 this.imageButtons[cardIndex].setImageResource(getResources().getIdentifier("card_"  + cardNumber[0] + cardSuit[1], "drawable", getPackageName())); 
-         }
+		 String cardString = grid.get(cardIndex);
+		this.imageButtons[cardIndex].setImageResource(getResources().getIdentifier(cardString, "drawable" ,getPackageName())); 
+    }//END selectCardButton()
+	 
+	 
+	// pick eight cards out of a 52 card deck and shuffle 2 copies of each into a 16 member ArrayList
+		private static ArrayList<String> pickEightCards() {
+			Random random = new Random();
+			ArrayList<String> deckOfCards = new ArrayList<String>();
+			String[] cardSuit={"c","d","h","s"};
+			ArrayList<String> cardSelected = new ArrayList<String>();
+			String card;
+			
+			// create ArrayList of cards
+			for (String suit : cardSuit) 
+				for (int index = 1; index < 14; index++) 
+					deckOfCards.add("card_"+index+suit);
+
+			// remove eight random cards and put them into another list
+			for (int index = 0; index < 8; index++) {
+				card = deckOfCards.remove(random.nextInt(deckOfCards.size()));
+				// add the same random card to the new list twice
+				cardSelected.add(card);
+				cardSelected.add(card);
+			} // end for
+			
+			// shuffle the card list
+			Collections.shuffle(cardSelected);
+			
+			return cardSelected;
+		} // end pickEightCards method
 		  
-	 };
+	 }; // END MainActivity
 	
 	//myImageButton0.setImageDrawable(getResource()getDrawable(R.drawable.cardback))
 	
