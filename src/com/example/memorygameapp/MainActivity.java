@@ -8,6 +8,8 @@ import java.util.Random;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -23,27 +25,31 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	//Game Objects
+	//Game Objects ###########################################################################
 	private ImageButton myImageButton0,myImageButton1,myImageButton2,myImageButton3,myImageButton4,myImageButton5,myImageButton6,myImageButton7,myImageButton8,myImageButton9
 	,myImageButton10,myImageButton11,myImageButton12,myImageButton13,myImageButton14,myImageButton15;
 	private ImageButton[] imageButtons =  { myImageButton0,myImageButton1,myImageButton2,myImageButton3,myImageButton4,myImageButton5,myImageButton6,myImageButton7,myImageButton8,myImageButton9
 											,myImageButton10,myImageButton11,myImageButton12,myImageButton13,myImageButton14,myImageButton15};;
-	private EditText timerLabel;
-	private EditText scoreLabel;
+	private EditText timerLabel, scoreLabel;
 	private TextView dsplayMessage;
-	final Handler handler = new Handler();
+
+	//LOCAL VARIABLES ##########################################################################
 	//stores the unique value pairs of cards
 	HashMap<Integer, String> grid = new HashMap<Integer, String>();
-
+	//Score
+	private int score = 0;
 	//stores the index of the cards face up. if none up start as - number
-	int card1 = -1;
-	int card2 = -1;
+	private int card1 = -1;
+	private int card2 = -1;
 	//keeps time after game starts
 	public CountDownTimer cd;
 	//flag for when game starts and timer starts
 	private Boolean gameStarted;
 	//flag for a correct match
 	boolean correctAnswer = false;
+	final Handler handler = new Handler();
+	private Context ctx = this;
+	private int pairsToMatch = 8;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +78,10 @@ public class MainActivity extends Activity {
 		imageButtons[14] = this.myImageButton14 = (ImageButton) findViewById(R.id.ImageButton15);
 		imageButtons[15] = this.myImageButton15 = (ImageButton) findViewById(R.id.ImageButton16);
 		
+		//setup the game
+		init();
+		
+		
 	//LOOP to add event listeners to each button		
 	for( int i = 15 ; i >= 0; i -- ) {
 		imageButtons[i].setBackgroundColor(android.R.drawable.btn_default);
@@ -85,19 +95,6 @@ public class MainActivity extends Activity {
 				} //method onClick ends
 			});	//END	setOnClickListener
 		}//END for
-	
-
-	
-	//Initialize the game
-	Iterator<String> iterator = pickEightCards().iterator();
-	int key=0;
-	//LOOP through and store the random card values
-	while (iterator.hasNext()) {
-		String value = (String) iterator.next();
-		grid.put(key, value);
-		key++;
-	}
-	gameStarted = false;
 	
 }//END onCreate()
 	
@@ -142,16 +139,14 @@ public class MainActivity extends Activity {
 				@Override
 				public void onFinish() {
 					//when the timer runs out
-					
+					endGame("Game Over");
 				}
 			}.start(); //starts timer on creation
 		 
 		 }	//END if
 		 
-		 String cardString = grid.get(cardIndex);
-		
-
-		 
+		 //LOGIC to see how many cards are up #################################################
+		 String cardString = grid.get(cardIndex);		 
 		//Store face up card values
 		if(card1 == cardIndex){
 			card1 = -1;
@@ -173,6 +168,11 @@ public class MainActivity extends Activity {
 				this.imageButtons[cardIndex].setVisibility(View.INVISIBLE);
 				card1 = -1;
 				card2 = -1;
+				if(score == pairsToMatch){
+					//Stop timer and display winning screen
+					cd.cancel();
+					endGame("You Win!");
+				}
 			}
 			else{
 				final int index = cardIndex;
@@ -185,13 +185,35 @@ public class MainActivity extends Activity {
 				}, 500);
 				
 					}//END else
-
 		}		
 		
     }//END selectCardButton()
 	 
 	 
 	 //PRIVATE UTILITY METHODS
+	 private void init(){//Initialize the game
+			//LOOP through and store the random card values
+			int key=0;
+			Iterator<String> iterator = pickEightCards().iterator();
+			while (iterator.hasNext()) {
+				String value = (String) iterator.next();
+				grid.put(key, value);
+				key++;
+			}
+			//setup the buttons back to default
+			for( int i = 15 ; i >= 0; i -- ) {
+				this.imageButtons[i].setBackgroundColor(android.R.drawable.btn_default);
+				this.imageButtons[i].setVisibility(View.VISIBLE);
+				this.imageButtons[i].setImageResource(getResources().getIdentifier("cardback", "drawable" ,getPackageName()));
+			}//END for
+
+			gameStarted = false;
+			card1 = -1;
+			card2 = -2;
+			score = 0;
+			this.scoreLabel.setText("0");
+			 this.timerLabel.setText("0");
+	 }
 	  
 	// pick eight cards out of a 52 card deck and shuffle 2 copies of each into a 16 member ArrayList
 		private static ArrayList<String> pickEightCards() {
@@ -220,6 +242,10 @@ public class MainActivity extends Activity {
 			return cardSelected;
 		} // end pickEightCards method
 		
+		/*
+		 * @param1 takes the index of the first card being checked
+		 * @param2 takes the index of the second card being checked
+		 */
 		private Boolean checkMatch(int cardValue1, int cardValue2){
 			String s1 =  grid.get(cardValue1);
 			String s2 =  grid.get(cardValue2);
@@ -227,6 +253,8 @@ public class MainActivity extends Activity {
 			if (s1.equals(s2)) {
 				dsplayMessage.setText("Right!");
 				correctAnswer = true;
+				score ++;
+				scoreLabel.setText(String.valueOf(score));
 			} // end if
 			else {
 				card2 = -1;
@@ -236,7 +264,38 @@ public class MainActivity extends Activity {
 			return correctAnswer;
 		}//END checkMatch()
 		
-		
+			public void endGame(String winStatus) {
+		//display 0 on the timer
+	   	 this.timerLabel.setText("0");
+	   	 
+	   // RED's Code to SETUP DIALOG WINDOW ###########################################################
+	   	 AlertDialog.Builder dialogueBox = new AlertDialog.Builder(this.ctx);
+	   	 
+	   	 //change score label to show the final score
+	   	dialogueBox.setMessage("Final Score: " + score);
+	   	dialogueBox.setCancelable(false);
+	   	
+	   	dialogueBox.setTitle(winStatus);
+	        
+	    //set up the positive button to allow the user to play again
+	   	dialogueBox.setPositiveButton("Play Again?", new DialogInterface.OnClickListener() {
+	       	 public void onClick(DialogInterface dialog, int id) {
+	       		 	init(); //restart the game
+	                dialog.cancel(); //close the dialog
+	            } //END onClick()
+	        }); //END OnClickListener
+	        
+	   	dialogueBox.setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+	       	 public void onClick(DialogInterface dialog, int id) {
+	       		 //Closes the whole app
+	       		 System.exit(0); 
+	       	 } //END onClick
+	        }); //END OnClickListener
+
+	   	//build the dialogue box and then show it
+	        AlertDialog alert = dialogueBox.create();
+	        alert.show();
+		} //END gameEND()
 		  
 }; // END MainActivity
 	
