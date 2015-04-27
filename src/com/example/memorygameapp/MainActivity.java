@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
 	final Handler handler = new Handler();
 	private Context ctx = this;
 	private int pairsToMatch = 8;
+	private long currentTime;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +86,7 @@ public class MainActivity extends Activity {
 		imageButtons[15] = this.myImageButton15 = (ImageButton) findViewById(R.id.ImageButton16);
 		
 		//setup the game
-		init();
+		init(false);
 		
 		
 	//LOOP to add event listeners to each button		
@@ -135,20 +136,7 @@ public class MainActivity extends Activity {
 			 gameStarted = true;
 		 
 		 //creates a timer at 30 seconds and starts counting down after the first click
-		 cd = new CountDownTimer(30000, 1000) {
-
-				//onTick update the timerTextView with how many seconds are remaining
-			     public void onTick(long millisUntilFinished) {
-			    	 timerLabel .setText("" + millisUntilFinished / 1000);
-			     }
-
-				@Override
-				public void onFinish() {
-					//when the timer runs out
-					endGame("Game Over");
-				}
-			}.start(); //starts timer on creation
-		 
+			 createTimer(30000);		 
 		 }	//END if
 		 
 		 //LOGIC to see how many cards are up #################################################
@@ -158,7 +146,7 @@ public class MainActivity extends Activity {
 			card1 = -1;
 			this.imageButtons[cardIndex].setImageResource(getResources().getIdentifier("cardback", "drawable" ,getPackageName()));
 			imageButtons[cardIndex].setBackgroundColor(android.R.drawable.btn_default);
-			 this.dsplayMessage.setText("“Pick a card, any card");
+			 this.dsplayMessage.setText("Pick a card, any card");
 		}
 		else if(card1 < 0){
 			 //setup highlight of selected
@@ -176,10 +164,13 @@ public class MainActivity extends Activity {
 				this.imageButtons[cardIndex].setVisibility(View.INVISIBLE);
 				card1 = -1;
 				card2 = -1;
-				if(score == pairsToMatch){
+				pairsToMatch--;
+				if(pairsToMatch == 0){
 					//Stop timer and display winning screen
 					cd.cancel();
-					endGame("You Win!");
+					init(true);
+					currentTime = currentTime + 10000;
+					createTimer(currentTime);				
 				}
 			}
 			else{
@@ -202,7 +193,7 @@ public class MainActivity extends Activity {
 	 /*
 	  * Method to initialize the game and be called when play again is pressed
 	  */
-	 private void init(){
+	 private void init(Boolean nextLevel){
 			//LOOP through and store the random card values
 			int key=0;
 			Iterator<String> iterator = pickEightCards().iterator();
@@ -218,13 +209,18 @@ public class MainActivity extends Activity {
 				this.imageButtons[i].setImageResource(getResources().getIdentifier("cardback", "drawable" ,getPackageName()));
 			}//END for
 
-			//Reset all varialbles
-			gameStarted = false;
+			//Reset all variables		 
 			card1 = -1;
 			card2 = -2;
-			score = 0;
-			this.scoreLabel.setText("0");
-			 this.timerLabel.setText("0");
+			pairsToMatch = 8;
+			
+			if(nextLevel == false) 
+				{score = 0;
+				gameStarted = false;
+				this.scoreLabel.setText("0");
+				 this.timerLabel.setText("0");
+				 this.currentTime = 0;
+				}	
 			 this.dsplayMessage.setText("“Pick a card, any card");
 	 }
 	  
@@ -300,7 +296,7 @@ public class MainActivity extends Activity {
 	    //set up the positive button to allow the user to play again
 	   	dialogueBox.setPositiveButton("Play Again?", new DialogInterface.OnClickListener() {
 	       	 public void onClick(DialogInterface dialog, int id) {
-	       		 	init(); //restart the game
+	       		 	init(false); //restart the game
 	                dialog.cancel(); //close the dialog
 	            } //END onClick()
 	        }); //END OnClickListener
@@ -316,6 +312,26 @@ public class MainActivity extends Activity {
 	        AlertDialog alert = dialogueBox.create();
 	        alert.show();
 		} //END gameEND()
+			
+			private void createTimer(long time){
+				 //creates a timer at 30 seconds and starts counting down after the first click
+				 cd = new CountDownTimer(time, 1000) {
+
+						//onTick update the timerTextView with how many seconds are remaining
+					     public void onTick(long millisUntilFinished) {
+					    	 timerLabel .setText("" + millisUntilFinished / 1000);
+					    	 currentTime = millisUntilFinished;
+					     }
+
+						@Override
+						public void onFinish() {
+							//when the timer runs out
+							endGame("Game Over");
+						}
+					}.start(); //starts timer on creation
+			}//END createTimer()
+			
+			
 		  
 }; // END MainActivity
 	
